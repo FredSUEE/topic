@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+var Parse = require('parse/node');
+var fs = require('fs');
+
+Parse.initialize(
+  process.env.APP_ID || 'myAppId',
+  '',
+  process.env.MASTER_KEY || ''
+);
+
+Parse.serverURL = process.env.SERVER_URL || 'http://localhost:1337/parse';
+
+function saveArticle(obj) {
+  var Article = Parse.Object.extend("Article");
+  var article = new Article();
+  article.set("topic_id", obj.topic_id)
+  article.set("text", obj.text);
+  article.set("media_url", obj.media_url);
+  article.set("original_url", obj.original_url);
+  article.save({
+    success: function(place){
+        console.log("Success!!");
+    },
+    error: function(place, error){
+        console.log("Fail: " + error.message);
+    }
+  });
+}
+
+function saveTopic(obj) {
+  var Topic = Parse.Object.extend("Topic");
+  var topic = new Topic();
+  topic.set("title", obj.title);
+  topic.set("description", obj.desc);
+  topic.set("image_url", obj.topic_image);
+  topic.set("topic_id", obj.id);
+  topic.save({
+    success: function(place){
+        console.log("Success!!");
+    },
+    error: function(place, error){
+        console.log("Fail: " + error.message);
+    }
+  });
+}
+
+var article_file_string = fs.readFileSync('article.json', 'utf8')
+var article_arr = article_file_string.split('\n')
+
+for (i = 0; i < article_arr.length; i++) {
+    var obj = JSON.parse(article_arr[i])
+    saveArticle(obj);
+}
+
+var topic_file_string = fs.readFileSync('topic.json', 'utf8')
+var topic_arr = topic_file_string.split('\n')
+
+for (i = 0; i < topic_arr.length; i++) {
+    var obj = JSON.parse(topic_arr[i])
+    saveTopic(obj);
+}
